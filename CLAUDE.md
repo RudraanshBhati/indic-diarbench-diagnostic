@@ -84,8 +84,16 @@ Still open, and where our contribution must live:
 
 **Positioning is deferred until we have our own numbers.** Do not rewrite contribution claims on speculation; produce Stage 0–3 results first, then revisit.
 
-### Known discrepancy in the source paper
-§5 states Telugu has "the highest overlap (24.7%)", but their Table 2 gives Telugu 20.4% and Maithili 24.7%. Possibly a near-field-only figure. Our Stage 0 audit should resolve which — a small genuine correction.
+### Resolved: the source paper's Telugu figure
+§5 calls Telugu the highest-overlap language at 24.7% while Table 2 gives it 20.4%. **Both are correct** — §5 silently reports near-field only. Stage 0 measures near-field Telugu at 24.59% overlap with 4.5 speakers/recording, matching their §5 figures; all-conditions is 20.29%, matching Table 2. Useful confirmation that their language-level analysis is near-field-only, which is why §6.7 here must be too.
+
+### Stage 0 measured facts (use these, they are verified)
+- 1,164 clips / 590 recordings / 107.7 h. Near-field 781 clips (22 langs), far-field 173 (8), in-the-wild 210 (10).
+- Overlap denominator is `speech_union`, confirmed against published values (MAE 0.20pp).
+- **Recording concentration**: the top 10 recordings hold 17.1% of all clips; `hindi_nf_001` alone has 21. Effective n is nearer 590 than 1,164.
+- Clip duration: median 201 s, mean 333 s, range 3.8–3,622 s. Only 2% under 60 s, so per-clip WER is stable — but always duration-weight aggregates.
+- **Three clips have 1 speaker** (`marathi_030`, `odia_011`, `sanskrit_004`, all <12 s), contradicting the README's "2-9". Exclude them from speaker-confusion analyses — a single-speaker clip cannot be misattributed.
+- The `[ ]` bracket convention is **not corpus-wide**: only 71/1,164 clips use it, 831 of 957 spans are Tamil, 865 of 957 in-the-wild. Treat annotator code-switch marks as a per-team artifact, not a label; the Unicode-script CMI is the primary measure.
 
 ### Supplementary unavailable
 Their `DatasetSummary.csv` (referenced in §5 for language-wise near-vs-far-field results) is **not** in the HF repo — checked, 404. Recompute if needed.
@@ -194,7 +202,8 @@ WhisperX re-run to show conclusions survive a baseline swap; 6–10 qualitative 
 - Text normalization mismatch (punctuation, casing, digits, noise tags) silently inflates WER. Validate against the published baselines first.
 - Treating clips as independent — 1,164 clips, 590 recordings. Always group by `recording_id`.
 - Comparing languages across different condition mixes — restrict §6.7 to near-field.
-- **Overlap ratio anti-correlates with resource level** (Punjabi 6.1% vs Maithili 24.7%). A language-disparity finding may be an overlap artifact. Control for overlap before attributing anything to language.
+- **Overlap is strongly confounded with speaker count** — measured in Stage 0: r = +0.45 (p≈1e-40, near-field, n=781); mean overlap 9.1% / 15.3% / 20.3% for 2 / 3-4 / 5+ speakers. The benchmark paper's §5 treats these as separate difficulty factors ("highest overlap **and** 4.5 speakers"); they are not separable without a multivariable model. Never attribute an effect to overlap without controlling speaker count, or vice versa.
+- Overlap vs *resource level* is a **weak, non-significant** trend, not an established confound: Spearman(hours, near-field overlap) = -0.383, p = 0.078, n = 22; single-condition languages average 17.5% overlap vs 16.1% for three-condition ones. Do not claim a resource-overlap relationship on this evidence — quoting the Punjabi 6.1% / Maithili 24.7% extremes is cherry-picking.
 - Regressing on DER *and* its components together (singular by construction).
 - Per-segment speaker mapping instead of one global permutation per clip — defines away the effect being measured.
 - Choosing τ, overlap bins, or speaker bins after seeing which cut tells the best story. Fix them first; bins are already specified above.
