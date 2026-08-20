@@ -1,0 +1,69 @@
+[project]
+name = "indic-diarbench-degradation"
+version = "0.1.0"
+description = "Do ASR/diarization errors in Indic conversational speech propagate into downstream LLM task failures?"
+readme = "README.md"
+requires-python = ">=3.11,<3.12"
+
+# Core: everything needed for Stage 0 (audit) and Stage 1 scoring.
+# Installs on the M4 Mac with no CUDA / no compiler toolchain.
+dependencies = [
+    "datasets>=3.0",
+    "huggingface-hub>=0.28",
+    "pyarrow>=17",
+    "pandas>=2.2",
+    "numpy>=1.26",
+    "tqdm>=4.66",
+    "python-dotenv>=1.0",
+    "hf-transfer>=0.1.8",
+    # --- scoring: reuse reference implementations, do not hand-roll ---
+    "jiwer>=3.0",             # WER
+    "pyannote.metrics>=3.2",  # DER (+ RTTM parsing)
+    "meeteval>=0.4",          # cpWER / ORC-WER (CHiME reference impl)
+    # --- Indic text normalization (WER normalization must match the paper) ---
+    "indic-nlp-library>=0.92",
+    # --- audio io ---
+    "soundfile>=0.12",
+    "librosa>=0.10",
+    # --- stats: §4.5 correlation/bootstrap, §4.6 mixed-effects regression ---
+    "scipy>=1.14",
+    "statsmodels>=0.14",
+    # --- plots ---
+    "matplotlib>=3.9",
+    "seaborn>=0.13",
+]
+
+[project.optional-dependencies]
+# Stage 1 inference. Install on the RTX 4070 box only:  uv sync --extra gpu
+gpu = [
+    "torch>=2.4",
+    "transformers>=4.45",
+    "faster-whisper>=1.0",
+    "pyannote.audio>=3.3",
+    "accelerate>=1.0",
+]
+# Stage 2-4 downstream LLM runs.
+llm = [
+    "vllm>=0.6; sys_platform == 'linux'",
+    "openai>=1.50",
+    "llama-cpp-python>=0.3",
+]
+
+[dependency-groups]
+dev = [
+    "ipykernel>=6.29",
+    "jupyter>=1.1",
+    "pytest>=8.3",
+    "ruff>=0.7",
+]
+
+[tool.uv]
+# torch wheels for CPU on macOS come from PyPI; the 4070 box resolves CUDA wheels.
+default-groups = ["dev"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

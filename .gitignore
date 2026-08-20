@@ -1,0 +1,30 @@
+# python
+__pycache__/
+*.py[cod]
+.venv/
+.ipynb_checkpoints/
+.pytest_cache/
+.ruff_cache/
+
+# data artifacts — regenerate with the pipeline, don't commit
+data/*.parquet
+data/audio_cache/
+reports/figures/*.png
+reports/figures/*.pdf
+
+# keep small, reviewable artifacts
+!data/reference_stats.csv
+!data/.gitkeep
+
+# hf / model caches
+.cache/
+*.ckpt
+*.bin
+
+# secrets
+.env
+.env.*
+
+# office temp files
+~$*
+.DS_Store
